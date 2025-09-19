@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import axios from 'axios';
+import { compileCode } from '../api/compiler';
 
 const IDE: React.FC = () => {
   const [code, setCode] = useState<string>('#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}');
@@ -13,10 +13,7 @@ const IDE: React.FC = () => {
     setOutput('Compiling...');
     try {
       // Replace with your backend API URL
-      const response = await axios.post('http://localhost:5000/api/compile', {
-        code,
-        input
-      });
+      const response = await compileCode(code, input);
       setOutput(response.data.output || `Process exited with code ${response.data.exitCode}`);
     } catch (error: any) {
       console.error('Error:', error);
