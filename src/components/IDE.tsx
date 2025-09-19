@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { compileCode } from '../api/compiler';
+import axios from 'axios';
 
 const IDE: React.FC = () => {
   const [code, setCode] = useState<string>('#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}');
@@ -12,8 +12,10 @@ const IDE: React.FC = () => {
     setIsLoading(true);
     setOutput('Compiling...');
     try {
+      
       // Replace with your backend API URL
-      const response = await compileCode(code, input);
+      const response = await axios.post('https://c-language-backend.vercel.app/api/compile', {code, input})
+      console.log(response.data)
       setOutput(response.data.output || `Process exited with code ${response.data.exitCode}`);
     } catch (error: any) {
       console.error('Error:', error);
