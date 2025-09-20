@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { compileCode } from '../api/compiler';
 
 const IDE: React.FC = () => {
   const [code, setCode] = useState<string>('#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}');
@@ -14,20 +12,25 @@ const IDE: React.FC = () => {
     setIsLoading(true);
     setOutput('Compiling...');
     try {
-      
-      // Replace with your backend API URL
-    const response = await axios.post(`${API_URL}/api/compile`, {
-  code, 
-  input
-});
-      console.log(response.data)
+      const response = await compileCode(code, input);
       setOutput(response.data.output || `Process exited with code ${response.data.exitCode}`);
     } catch (error: any) {
       console.error('Error:', error);
-      if (error.response?.data?.error) {
-        setOutput(`Error: ${error.response.data.error}`);
+      
+      // Handle different error scenarios
+      if (error.response) {
+        // Server responded with an error status
+        if (error.response.data?.error) {
+          setOutput(`Error: ${error.response.data.error}`);
+        } else {
+          setOutput(`Server error: ${error.response.status} ${error.response.statusText}`);
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        setOutput('Cannot connect to the compiler service. Please check if the server is running.');
       } else {
-        setOutput('Failed to connect to the compiler service.');
+        // Something else happened
+        setOutput('An unexpected error occurred: ' + error.message);
       }
     } finally {
       setIsLoading(false);
