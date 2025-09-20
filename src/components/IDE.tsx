@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const IDE: React.FC = () => {
   const [code, setCode] = useState<string>('#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}');
   const [input, setInput] = useState<string>('');
@@ -14,7 +16,10 @@ const IDE: React.FC = () => {
     try {
       
       // Replace with your backend API URL
-      const response = await axios.post('https://c-language-backend.vercel.app/api/compile', {code, input})
+    const response = await axios.post(`${API_URL}/api/compile`, {
+  code, 
+  input
+});
       console.log(response.data)
       setOutput(response.data.output || `Process exited with code ${response.data.exitCode}`);
     } catch (error: any) {
